@@ -11,11 +11,11 @@ import (
 const defaultLimit = 50
 
 type SearchResult struct {
-	DocumentID    string `db:"document_id"`
-	DocumentTitle string `db:"title"`
-	PageID        string `db:"page_id"`
-	PageNumber    int    `db:"page_number"`
-	Snippet       string `db:"snippet"`
+	DocumentID    string `db:"document_id" json:"document_id"`
+	DocumentTitle string `db:"title" json:"document_title"`
+	PageID        string `db:"page_id" json:"page_id"`
+	PageNumber    int    `db:"page_number" json:"page_number"`
+	Snippet       string `db:"snippet" json:"snippet"`
 }
 
 // UpsertPage replaces the search_fts row for a single page, embedding its

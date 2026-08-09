@@ -2,6 +2,7 @@ package fts
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"strings"
 	"testing"
 
@@ -226,5 +227,30 @@ func TestDeletePageRemovesFTSRow(t *testing.T) {
 	}
 	if len(results) != 0 {
 		t.Errorf("results len = %d, want 0 after page delete", len(results))
+	}
+}
+
+func TestSearchResultJSONTags(t *testing.T) {
+	r := SearchResult{
+		DocumentID:    "d1",
+		DocumentTitle: "t",
+		PageID:        "p1",
+		PageNumber:    1,
+		Snippet:       "s",
+	}
+	b, err := json.Marshal(r)
+	if err != nil {
+		t.Fatalf("json.Marshal() error: %v", err)
+	}
+	raw := string(b)
+	for _, key := range []string{`"document_id"`, `"document_title"`, `"page_id"`, `"page_number"`, `"snippet"`} {
+		if !strings.Contains(raw, key) {
+			t.Errorf("json output missing %s: %s", key, raw)
+		}
+	}
+	for _, key := range []string{`"DocumentID"`, `"DocumentTitle"`, `"PageID"`, `"PageNumber"`} {
+		if strings.Contains(raw, key) {
+			t.Errorf("json output should not contain Go field name %s: %s", key, raw)
+		}
 	}
 }
