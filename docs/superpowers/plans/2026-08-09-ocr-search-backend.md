@@ -2583,3 +2583,17 @@ Only commit if files actually changed.
 **No placeholders:** every code step contains complete, compilable code.
 
 **Type consistency:** `ProcessOptions{Concurrency, RetryMax}` is the single options type used by `ProcessBatch` and `main.go`; `ocr.Config` is the single client config type; `fts.SearchResult` is the single result type shared by `fts.Search`, `search.RunSearch`, and the JSON response.
+
+---
+
+## Execution Notes (deviations found during implementation)
+
+1. **Explicit `created`/`updated` autodate fields added to migrations.** PocketBase v0.39 only provides these when declared; the worker needs `created` for FIFO ordering. Verified: without them, `FindRecordsByFilter(..., "created", ...)` fails with `invalid sort field`.
+2. **`highlight()` replaces `snippet()` in the FTS query.** This SQLite build raises `SQL logic error: wrong number of arguments to function snippet() (1)` whenever `MATCH` finds rows; `highlight()` works and produces the same `<em>` markers.
+3. **Hook handlers must call `e.Next()`.** The after-create hooks returned early without chaining, so the first-registered hook swallowed the rest (no `ocr_queue` entry on upload). All hooks now call `e.Next()` after their work; a regression test registers hooks in production order.
+4. **`SearchResult` gained `json` tags.** Without them the API returned capitalized Go field names (`DocumentID`); responses now use `document_id`, `document_title`, `page_id`, `page_number`, `snippet`.
+5. **Superuser API auth uses `Authorization: Bearer <token>`** in v0.39 (the `Admin` prefix used in Task 9 returns 403 for admin-only actions). Documents list worked with either because it only requires any auth.
+6. **Error messages are sentence-cased by PocketBase** (`inflector.Sentenize`), so `"missing q parameter"` is returned as `"Missing q parameter."`.
+7. **Test pages need an image** because `pages.image` is required; test helpers attach a 1x1 PNG.
+8. **FTS5 tokenizes on word boundaries**, so multi-word assertions must query single tokens (`new` for "New Title", `seed` for "Seed Manual").
+9. **`docker compose up --build` reset the `pb-data` volume** during this session, requiring superuser re-creation after rebuilds.
