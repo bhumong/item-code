@@ -109,22 +109,37 @@ func Search(app core.App, q string, limit int) ([]SearchResult, error) {
 // RegisterHooks keeps search_fts in sync with page/document changes.
 func RegisterHooks(app core.App) {
 	app.OnRecordAfterCreateSuccess("pages").BindFunc(func(e *core.RecordEvent) error {
-		return UpsertPage(e.App, e.Record)
+		if err := UpsertPage(e.App, e.Record); err != nil {
+			return err
+		}
+		return e.Next()
 	})
 	app.OnRecordAfterUpdateSuccess("pages").BindFunc(func(e *core.RecordEvent) error {
-		return UpsertPage(e.App, e.Record)
+		if err := UpsertPage(e.App, e.Record); err != nil {
+			return err
+		}
+		return e.Next()
 	})
 	app.OnRecordAfterDeleteSuccess("pages").BindFunc(func(e *core.RecordEvent) error {
 		_, err := e.App.DB().NewQuery(`DELETE FROM search_fts WHERE page_id = {:page_id}`).
 			Bind(dbx.Params{"page_id": e.Record.Id}).Execute()
-		return err
+		if err != nil {
+			return err
+		}
+		return e.Next()
 	})
 	app.OnRecordAfterUpdateSuccess("documents").BindFunc(func(e *core.RecordEvent) error {
-		return RefreshDocument(e.App, e.Record)
+		if err := RefreshDocument(e.App, e.Record); err != nil {
+			return err
+		}
+		return e.Next()
 	})
 	app.OnRecordAfterDeleteSuccess("documents").BindFunc(func(e *core.RecordEvent) error {
 		_, err := e.App.DB().NewQuery(`DELETE FROM search_fts WHERE document_id = {:document_id}`).
 			Bind(dbx.Params{"document_id": e.Record.Id}).Execute()
-		return err
+		if err != nil {
+			return err
+		}
+		return e.Next()
 	})
 }

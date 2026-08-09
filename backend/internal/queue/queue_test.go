@@ -88,8 +88,10 @@ func findQueueEntry(t *testing.T, app core.App, pageID string) *core.Record {
 
 func TestPageCreateCreatesQueueEntry(t *testing.T) {
 	app := newTestApp(t)
-	RegisterHooks(app)
+	// Register in the same order as main.go (fts first, queue second) to guard
+	// against hook handlers that fail to call e.Next() and swallow the chain.
 	fts.RegisterHooks(app)
+	RegisterHooks(app)
 
 	_, page := seedPageWithImage(t, app)
 
@@ -99,6 +101,16 @@ func TestPageCreateCreatesQueueEntry(t *testing.T) {
 	}
 	if entry.GetString("page") != page.Id {
 		t.Errorf("queue page = %q, want %q", entry.GetString("page"), page.Id)
+	}
+
+	// The fts hook must also have run: the page should be searchable.
+	// FTS5 tokenizes "Seed Manual" into "seed" + "manual", so query a single token.
+	results, err := fts.Search(app, "seed", 10)
+	if err != nil {
+		t.Fatalf("fts.Search() error: %v", err)
+	}
+	if len(results) != 1 {
+		t.Errorf("fts results len = %d, want 1 (both hooks must run)", len(results))
 	}
 }
 

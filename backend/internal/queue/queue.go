@@ -10,7 +10,6 @@ import (
 	"github.com/pocketbase/dbx"
 	"github.com/pocketbase/pocketbase/core"
 
-	"ocrsearch/backend/internal/fts"
 	"ocrsearch/backend/internal/ocr"
 )
 
@@ -28,12 +27,13 @@ type ProcessOptions struct {
 
 // RegisterHooks wires page/queue lifecycle hooks.
 func RegisterHooks(app core.App) {
-	// On page creation: enqueue an OCR task (and index the page in FTS).
+	// On page creation: enqueue an OCR task. FTS indexing is handled by the
+	// separate fts hooks. e.Next() keeps the handler chain running.
 	app.OnRecordAfterCreateSuccess("pages").BindFunc(func(e *core.RecordEvent) error {
 		if err := CreateQueueEntry(e.App, e.Record); err != nil {
 			return err
 		}
-		return fts.UpsertPage(e.App, e.Record)
+		return e.Next()
 	})
 
 	// Apply spec defaults when records are created through the REST API.
