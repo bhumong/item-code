@@ -25,7 +25,7 @@ func TestCollectionsCreated(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, fname := range []string{"document", "page_number", "image", "ocr_text", "status"} {
+	for _, fname := range []string{"document", "page_number", "image", "ocr_text", "status", "created", "updated"} {
 		if pages.Fields.GetByName(fname) == nil {
 			t.Errorf("pages field %q missing", fname)
 		}
@@ -35,7 +35,7 @@ func TestCollectionsCreated(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	for _, fname := range []string{"page", "status", "retry_count", "error_log"} {
+	for _, fname := range []string{"page", "status", "retry_count", "error_log", "created", "updated"} {
 		if queue.Fields.GetByName(fname) == nil {
 			t.Errorf("ocr_queue field %q missing", fname)
 		}

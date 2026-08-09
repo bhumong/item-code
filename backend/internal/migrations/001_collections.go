@@ -22,6 +22,8 @@ func createCollections(app core.App) error {
 
 	documents := core.NewBaseCollection("documents")
 	documents.Fields.Add(&core.TextField{Name: "title", Required: true, Max: 500})
+	documents.Fields.Add(&core.AutodateField{Name: "created", OnCreate: true})
+	documents.Fields.Add(&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true})
 	documents.ListRule = types.Pointer(authRule)
 	documents.ViewRule = types.Pointer(authRule)
 	documents.CreateRule = types.Pointer(authRule)
@@ -53,6 +55,8 @@ func createCollections(app core.App) error {
 		MaxSelect: 1,
 		Values:    []string{"pending", "processing", "completed", "failed"},
 	})
+	pages.Fields.Add(&core.AutodateField{Name: "created", OnCreate: true})
+	pages.Fields.Add(&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true})
 	pages.ListRule = types.Pointer(authRule)
 	pages.ViewRule = types.Pointer(authRule)
 	pages.CreateRule = types.Pointer(authRule)
@@ -78,6 +82,8 @@ func createCollections(app core.App) error {
 	})
 	queue.Fields.Add(&core.NumberField{Name: "retry_count", OnlyInt: true})
 	queue.Fields.Add(&core.TextField{Name: "error_log"})
+	queue.Fields.Add(&core.AutodateField{Name: "created", OnCreate: true})
+	queue.Fields.Add(&core.AutodateField{Name: "updated", OnCreate: true, OnUpdate: true})
 	queue.AddIndex("idx_ocr_queue_page", true, "page", "")
 
 	return app.Save(queue)
