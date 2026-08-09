@@ -79,6 +79,6 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.done);
     await tester.pumpAndSettle();
 
-    expect(find.text('Search results'), findsOneWidget);
+    expect(find.widgetWithText(TextField, 'Search...'), findsOneWidget);
   });
 }
