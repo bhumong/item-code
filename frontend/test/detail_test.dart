@@ -60,7 +60,7 @@ void main() {
     expect(find.text('Completed'), findsOneWidget);
     expect(find.text('Processing'), findsOneWidget);
     expect(find.text('Failed'), findsOneWidget);
-    expect(find.text('Add Pages'), findsOneWidget);
+    expect(find.text('Upload Image'), findsOneWidget);
   });
 
   testWidgets('uploading pages increments progress and refreshes gallery',
@@ -72,7 +72,7 @@ void main() {
     await tester.pumpAndSettle();
 
     final container = ProviderScope.containerOf(
-      tester.element(find.text('Add Pages')),
+      tester.element(find.text('Upload Image')),
       listen: false,
     );
     await container.read(uploadControllerProvider.notifier).addPages('d1', [

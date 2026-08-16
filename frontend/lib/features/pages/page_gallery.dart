@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart' hide Page;
+import 'package:ocr_search/l10n/app_localizations.dart';
 
 import '../../core/models.dart';
 import 'status_tag.dart';
@@ -11,7 +12,9 @@ class PageGallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (pages.isEmpty) {
-      return const Center(child: Text('No pages yet. Use Add Pages to upload.'));
+      return Center(
+        child: Text(AppLocalizations.of(context)!.noPagesYet),
+      );
     }
     return GridView.builder(
       padding: const EdgeInsets.all(16),

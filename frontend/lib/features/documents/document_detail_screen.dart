@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ocr_search/l10n/app_localizations.dart';
 
 import '../auth/auth_controller.dart';
 import '../pages/page_gallery.dart';
@@ -45,24 +46,27 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
     final controller = TextEditingController(text: current?.document.title ?? '');
     final newTitle = await showDialog<String>(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Rename Document'),
-        content: TextField(
-          controller: controller,
-          autofocus: true,
-          decoration: const InputDecoration(labelText: 'Title'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: const Text('Cancel'),
+      builder: (dialogContext) {
+        final l10n = AppLocalizations.of(dialogContext)!;
+        return AlertDialog(
+          title: Text(l10n.renameDocument),
+          content: TextField(
+            controller: controller,
+            autofocus: true,
+            decoration: InputDecoration(labelText: l10n.titleLabel),
           ),
-          FilledButton(
-            onPressed: () => Navigator.of(context).pop(controller.text),
-            child: const Text('Save'),
-          ),
-        ],
-      ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(),
+              child: Text(l10n.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(controller.text),
+              child: Text(l10n.save),
+            ),
+          ],
+        );
+      },
     );
     final title = newTitle?.trim();
     if (title == null || title.isEmpty) return;
@@ -78,12 +82,13 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
     final pages = ref.watch(pagesProvider(widget.documentId));
     final upload = ref.watch(uploadControllerProvider);
     final documents = ref.watch(documentsProvider).value ?? const [];
+    final l10n = AppLocalizations.of(context)!;
     final title = documents
             .where((s) => s.document.id == widget.documentId)
             .firstOrNull
             ?.document
             .title ??
-        'Document';
+        l10n.documentTitle;
 
     return Scaffold(
       appBar: AppBar(
@@ -92,7 +97,7 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.edit),
-            tooltip: 'Edit title',
+            tooltip: l10n.editTitle,
             onPressed: _rename,
           ),
         ],
@@ -106,11 +111,11 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
                 FilledButton.icon(
                   onPressed: upload.uploading ? null : _pickAndUpload,
                   icon: const Icon(Icons.add_photo_alternate_outlined),
-                  label: const Text('Add Pages'),
+                  label: Text(l10n.uploadImage),
                 ),
                 const SizedBox(width: 16),
                 if (upload.uploading)
-                  Text('Uploading ${upload.done}/${upload.total}...'),
+                  Text(l10n.uploadingProgress(upload.done, upload.total)),
               ],
             ),
           ),
@@ -127,7 +132,7 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
               loading: () =>
                   const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) =>
-                  Center(child: Text('Failed to load pages: $error')),
+                  Center(child: Text(l10n.failedToLoadPages('$error'))),
               data: (items) => PageGallery(pages: items),
             ),
           ),
