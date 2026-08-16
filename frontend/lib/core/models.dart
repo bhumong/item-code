@@ -60,6 +60,7 @@ class SearchResult {
     required this.pageId,
     required this.pageNumber,
     required this.snippet,
+    this.pageImage = '',
   });
 
   final String documentId;
@@ -67,14 +68,23 @@ class SearchResult {
   final String pageId;
   final int pageNumber;
   final String snippet;
+  final String pageImage;
 
-  factory SearchResult.fromJson(Map<String, dynamic> json) {
+  factory SearchResult.fromJson(
+    Map<String, dynamic> json, {
+    String baseUrl = 'http://localhost:8090',
+  }) {
+    final pageId = json['page_id'] as String? ?? '';
+    final filename = json['page_image'] as String? ?? '';
     return SearchResult(
       documentId: json['document_id'] as String? ?? '',
       documentTitle: json['document_title'] as String? ?? '',
-      pageId: json['page_id'] as String? ?? '',
+      pageId: pageId,
       pageNumber: json['page_number'] as int? ?? 0,
       snippet: json['snippet'] as String? ?? '',
+      pageImage: filename.isEmpty
+          ? ''
+          : '$baseUrl/api/files/pages/$pageId/$filename',
     );
   }
 }

@@ -21,6 +21,7 @@ void main() {
         'document_title': 'Manual',
         'page_id': 'p1',
         'page_number': 3,
+        'page_image': 'page_abc.png',
         'snippet': 'the <em>needle</em> valve',
       });
       expect(r.documentId, 'd1');
@@ -28,6 +29,10 @@ void main() {
       expect(r.pageId, 'p1');
       expect(r.pageNumber, 3);
       expect(r.snippet, 'the <em>needle</em> valve');
+      expect(
+        r.pageImage,
+        'http://localhost:8090/api/files/pages/p1/page_abc.png',
+      );
     });
 
     test('defaults missing fields', () {
@@ -35,6 +40,7 @@ void main() {
       expect(r.documentId, '');
       expect(r.pageNumber, 0);
       expect(r.snippet, '');
+      expect(r.pageImage, '');
     });
   });
 
