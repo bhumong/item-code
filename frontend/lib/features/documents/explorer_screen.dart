@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ocr_search/l10n/app_localizations.dart';
 
+import '../../core/locale_provider.dart';
 import '../../core/models.dart';
 import 'create_document_dialog.dart';
 import 'documents_controller.dart';
@@ -12,18 +14,27 @@ class ExplorerScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final docs = ref.watch(documentsProvider);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('OCR Search'),
+        title: Text(l10n.appTitle),
+        actions: [
+          TextButton(
+            onPressed: () => ref.read(localeProvider.notifier).toggle(),
+            child: Text(
+              ref.watch(localeProvider).languageCode == 'en' ? 'ID' : 'EN',
+            ),
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(56),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: TextField(
-              decoration: const InputDecoration(
-                hintText: 'Search documents...',
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(),
+              decoration: InputDecoration(
+                hintText: l10n.searchDocumentsHint,
+                prefixIcon: const Icon(Icons.search),
+                border: const OutlineInputBorder(),
                 isDense: true,
               ),
               onSubmitted: (value) {
@@ -36,7 +47,7 @@ class ExplorerScreen extends ConsumerWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        tooltip: 'New Document',
+        tooltip: l10n.newDocument,
         onPressed: () => showDialog<void>(
           context: context,
           builder: (_) => const CreateDocumentDialog(),
@@ -46,9 +57,9 @@ class ExplorerScreen extends ConsumerWidget {
       body: docs.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
-            Center(child: Text('Failed to load documents: $error')),
+            Center(child: Text(l10n.failedToLoadDocuments('$error'))),
         data: (summaries) => summaries.isEmpty
-            ? const Center(child: Text('No documents yet. Tap + to create one.'))
+            ? Center(child: Text(l10n.noDocumentsYet))
             : _DocumentGrid(summaries: summaries),
       ),
     );
@@ -62,6 +73,7 @@ class _DocumentGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return GridView.builder(
       padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
@@ -91,8 +103,7 @@ class _DocumentGrid extends StatelessWidget {
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
                   Text(
-                    '${summary.pageCount} '
-                    '${summary.pageCount == 1 ? 'page' : 'pages'}',
+                    l10n.pageCount(summary.pageCount),
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
                 ],

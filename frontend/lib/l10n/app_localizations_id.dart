@@ -34,7 +34,7 @@ class AppLocalizationsId extends AppLocalizations {
       other: 'halaman',
       one: 'halaman',
     );
-    return '$_temp0';
+    return '$count $_temp0';
   }
 
   @override

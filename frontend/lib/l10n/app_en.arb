@@ -6,7 +6,7 @@
   "searchDocumentsHint": "Search documents...",
   "noDocumentsYet": "No documents yet. Tap + to create one.",
   "newDocument": "New Document",
-  "pageCount": "{count, plural, =1{page} other{pages}}",
+  "pageCount": "{count} {count, plural, =1{page} other{pages}}",
   "@pageCount": {
     "placeholders": {
       "count": {

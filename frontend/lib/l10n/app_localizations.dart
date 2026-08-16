@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// No description provided for @pageCount.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{page} other{pages}}'**
+  /// **'{count} {count, plural, =1{page} other{pages}}'**
   String pageCount(int count);
 
   /// No description provided for @failedToLoadDocuments.

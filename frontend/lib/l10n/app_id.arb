@@ -6,7 +6,7 @@
   "searchDocumentsHint": "Cari dokumen...",
   "noDocumentsYet": "Belum ada dokumen. Ketuk + untuk membuat.",
   "newDocument": "Dokumen Baru",
-  "pageCount": "{count, plural, =1{halaman} other{halaman}}",
+  "pageCount": "{count} {count, plural, =1{halaman} other{halaman}}",
   "@pageCount": {
     "placeholders": {
       "count": {

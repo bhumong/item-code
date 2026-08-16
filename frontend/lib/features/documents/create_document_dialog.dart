@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ocr_search/l10n/app_localizations.dart';
 
 import 'documents_controller.dart';
 
@@ -22,22 +23,23 @@ class _CreateDocumentDialogState extends ConsumerState<CreateDocumentDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: const Text('New Document'),
+      title: Text(l10n.newDocument),
       content: TextField(
         controller: _controller,
         autofocus: true,
-        decoration: const InputDecoration(labelText: 'Title'),
+        decoration: InputDecoration(labelText: l10n.titleLabel),
         onSubmitted: (_) => _create(context),
       ),
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.cancel),
         ),
         FilledButton(
           onPressed: () => _create(context),
-          child: const Text('Create'),
+          child: Text(l10n.create),
         ),
       ],
     );

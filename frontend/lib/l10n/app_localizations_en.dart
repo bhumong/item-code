@@ -34,7 +34,7 @@ class AppLocalizationsEn extends AppLocalizations {
       other: 'pages',
       one: 'page',
     );
-    return '$_temp0';
+    return '$count $_temp0';
   }
 
   @override

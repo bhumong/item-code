@@ -81,4 +81,15 @@ void main() {
 
     expect(find.widgetWithText(TextField, 'Search...'), findsOneWidget);
   });
+
+  testWidgets('locale toggle flips explorer labels to Indonesian',
+      (tester) async {
+    await tester.pumpWidget(testApp(seededFake()));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('ID'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Cari dokumen...'), findsOneWidget);
+  });
 }

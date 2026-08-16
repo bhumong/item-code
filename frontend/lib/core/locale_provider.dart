@@ -1,0 +1,19 @@
+import 'dart:ui';
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+class LocaleNotifier extends Notifier<Locale> {
+  @override
+  Locale build() {
+    final device = PlatformDispatcher.instance.locale;
+    return device.languageCode == 'id' ? const Locale('id') : const Locale('en');
+  }
+
+  void toggle() {
+    state =
+        state.languageCode == 'en' ? const Locale('id') : const Locale('en');
+  }
+}
+
+final localeProvider =
+    NotifierProvider<LocaleNotifier, Locale>(LocaleNotifier.new);
