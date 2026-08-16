@@ -81,16 +81,49 @@ class _ResultTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        leading: const Icon(Icons.description_outlined, size: 40),
-        title: Text('${result.documentTitle} - page ${result.pageNumber}'),
-        subtitle: HighlightedText(
-          text: result.snippet,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
         onTap: () => context.go('/documents/${result.documentId}'),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            if (result.pageImage.isNotEmpty)
+              Image.network(
+                result.pageImage,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const SizedBox(
+                  height: 200,
+                  child: Icon(Icons.broken_image_outlined, size: 40),
+                ),
+              )
+            else
+              const SizedBox(
+                height: 120,
+                child: Icon(Icons.image_outlined, size: 40),
+              ),
+            Padding(
+              padding: const EdgeInsets.all(12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.resultTitle(result.documentTitle, result.pageNumber),
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                  const SizedBox(height: 4),
+                  HighlightedText(
+                    text: result.snippet,
+                    style: Theme.of(context).textTheme.bodyMedium,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

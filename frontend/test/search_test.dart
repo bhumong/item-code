@@ -27,6 +27,7 @@ void main() {
           pageId: 'p1',
           pageNumber: 3,
           snippet: 'the <em>needle</em> valve regulates flow',
+          pageImage: 'http://localhost:8090/api/files/pages/p1/page_abc.png',
         ),
       ];
     await tester.pumpWidget(testApp(fake));
@@ -43,6 +44,10 @@ void main() {
 
     expect(find.text('Manual - page 3'), findsOneWidget);
     expect(find.textContaining('valve regulates flow'), findsOneWidget);
+    expect(find.byType(Image), findsOneWidget);
+    final imageTop = tester.getTopLeft(find.byType(Image)).dy;
+    final titleTop = tester.getTopLeft(find.text('Manual - page 3')).dy;
+    expect(imageTop, lessThan(titleTop));
     final richText = tester.widget<RichText>(find.byType(RichText).last);
     final hasBold = richText.text.visitChildren((span) {
       return span.style?.fontWeight != FontWeight.bold;
