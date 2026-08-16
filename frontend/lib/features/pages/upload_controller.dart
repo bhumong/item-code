@@ -1,9 +1,13 @@
 import 'dart:typed_data';
 
+import 'package:image_picker/image_picker.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../auth/auth_controller.dart';
 import 'pages_controller.dart';
+
+/// Injectable so widget tests can substitute a fake picker.
+final imagePickerProvider = Provider<ImagePicker>((ref) => ImagePicker());
 
 class UploadInput {
   const UploadInput({required this.bytes, required this.name});

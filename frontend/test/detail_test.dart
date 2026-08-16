@@ -3,12 +3,27 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ocr_search/app.dart';
 import 'package:ocr_search/core/models.dart';
 import 'package:ocr_search/features/auth/auth_controller.dart';
 import 'package:ocr_search/features/pages/upload_controller.dart';
 
 import 'fakes.dart';
+
+class FakeImagePicker extends ImagePicker {
+  @override
+  Future<XFile?> pickImage({
+    required ImageSource source,
+    double? maxWidth,
+    double? maxHeight,
+    int? imageQuality,
+    CameraDevice preferredCameraDevice = CameraDevice.rear,
+    bool requestFullMetadata = true,
+  }) async {
+    return XFile.fromData(Uint8List.fromList([1, 2, 3]), name: 'camera.png');
+  }
+}
 
 Widget testApp(FakeApiClient fake) {
   return ProviderScope(
@@ -107,5 +122,42 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(fake.documents.first.title, 'Renamed Manual');
+  });
+
+  testWidgets('detail shows camera upload button', (tester) async {
+    await tester.pumpWidget(testApp(seededFake()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Manual'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Upload from Camera'), findsOneWidget);
+    expect(find.byIcon(Icons.photo_camera_outlined), findsOneWidget);
+  });
+
+  testWidgets('camera capture uploads a page through the controller',
+      (tester) async {
+    final fake = seededFake();
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        apiClientProvider.overrideWithValue(fake),
+        imagePickerProvider.overrideWithValue(FakeImagePicker()),
+      ],
+      child: const OcrSearchApp(),
+    ));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Manual'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Upload from Camera'));
+    await tester.pumpAndSettle();
+
+    expect(fake.pagesByDocument['d1']!.length, 4);
+    final container = ProviderScope.containerOf(
+      tester.element(find.text('Manual')),
+      listen: false,
+    );
+    final uploadState = container.read(uploadControllerProvider);
+    expect(uploadState.uploading, false);
+    expect(uploadState.done, 1);
   });
 }

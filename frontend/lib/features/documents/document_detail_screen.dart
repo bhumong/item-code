@@ -2,6 +2,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart' hide Page;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:ocr_search/l10n/app_localizations.dart';
 
 import '../auth/auth_controller.dart';
@@ -21,6 +22,22 @@ class DocumentDetailScreen extends ConsumerStatefulWidget {
 }
 
 class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
+  Future<void> _captureAndUpload() async {
+    final file = await ref.read(imagePickerProvider).pickImage(
+          source: ImageSource.camera,
+          maxWidth: 4096,
+          maxHeight: 4096,
+          imageQuality: 92,
+        );
+    if (file == null) return;
+    final bytes = await file.readAsBytes();
+    await ref
+        .read(uploadControllerProvider.notifier)
+        .addPages(widget.documentId, [
+      UploadInput(bytes: bytes, name: file.name),
+    ]);
+  }
+
   Future<void> _pickAndUpload() async {
     final result = await FilePicker.pickFiles(
       type: FileType.image,
@@ -112,6 +129,12 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
                   onPressed: upload.uploading ? null : _pickAndUpload,
                   icon: const Icon(Icons.add_photo_alternate_outlined),
                   label: Text(l10n.uploadImage),
+                ),
+                const SizedBox(width: 12),
+                OutlinedButton.icon(
+                  onPressed: upload.uploading ? null : _captureAndUpload,
+                  icon: const Icon(Icons.photo_camera_outlined),
+                  label: Text(l10n.uploadFromCamera),
                 ),
                 const SizedBox(width: 16),
                 if (upload.uploading)
