@@ -73,3 +73,18 @@ func TestSearchFTSExists(t *testing.T) {
 		t.Errorf("search_fts count = %d, want 0", n)
 	}
 }
+
+func TestSearchFTSHasImageColumn(t *testing.T) {
+	app, err := tests.NewTestApp()
+	if err != nil {
+		t.Fatalf("NewTestApp() error: %v", err)
+	}
+	defer app.Cleanup()
+
+	// A SELECT on the image column fails if the column is missing.
+	rows, err := app.DB().NewQuery("SELECT image FROM search_fts LIMIT 1").Rows()
+	if err != nil {
+		t.Fatalf("search_fts image column query error: %v", err)
+	}
+	rows.Close()
+}
