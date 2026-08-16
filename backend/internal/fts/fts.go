@@ -16,6 +16,7 @@ type SearchResult struct {
 	PageID        string `db:"page_id" json:"page_id"`
 	PageNumber    int    `db:"page_number" json:"page_number"`
 	Snippet       string `db:"snippet" json:"snippet"`
+	PageImage     string `db:"page_image" json:"page_image"`
 }
 
 // UpsertPage replaces the search_fts row for a single page, embedding its
@@ -31,6 +32,7 @@ func UpsertPage(app core.App, page *core.Record) error {
 	title := doc.GetString("title")
 	ocrText := page.GetString("ocr_text")
 	pageNumber := page.GetInt("page_number")
+	image := page.GetString("image")
 
 	return app.RunInTransaction(func(txApp core.App) error {
 		if _, err := txApp.DB().NewQuery(`DELETE FROM search_fts WHERE page_id = {:page_id}`).
@@ -38,14 +40,15 @@ func UpsertPage(app core.App, page *core.Record) error {
 			return err
 		}
 		_, err := txApp.DB().NewQuery(`
-			INSERT INTO search_fts(title, ocr_text, page_id, document_id, page_number)
-			VALUES ({:title}, {:ocr_text}, {:page_id}, {:document_id}, {:page_number})
+			INSERT INTO search_fts(title, ocr_text, page_id, document_id, page_number, image)
+			VALUES ({:title}, {:ocr_text}, {:page_id}, {:document_id}, {:page_number}, {:image})
 		`).Bind(dbx.Params{
 			"title":       title,
 			"ocr_text":    ocrText,
 			"page_id":     pageID,
 			"document_id": docID,
 			"page_number": pageNumber,
+			"image":       image,
 		}).Execute()
 		return err
 	})
@@ -93,7 +96,7 @@ func Search(app core.App, q string, limit int) ([]SearchResult, error) {
 
 	results := []SearchResult{}
 	err := app.DB().NewQuery(`
-		SELECT document_id, title, page_id, page_number,
+		SELECT document_id, title, page_id, page_number, image AS page_image,
 		       highlight(search_fts, 1, '<em>', '</em>') AS snippet
 		FROM search_fts
 		WHERE search_fts MATCH {:q}

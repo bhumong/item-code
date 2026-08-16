@@ -243,7 +243,7 @@ func TestSearchResultJSONTags(t *testing.T) {
 		t.Fatalf("json.Marshal() error: %v", err)
 	}
 	raw := string(b)
-	for _, key := range []string{`"document_id"`, `"document_title"`, `"page_id"`, `"page_number"`, `"snippet"`} {
+	for _, key := range []string{`"document_id"`, `"document_title"`, `"page_id"`, `"page_number"`, `"snippet"`, `"page_image"`} {
 		if !strings.Contains(raw, key) {
 			t.Errorf("json output missing %s: %s", key, raw)
 		}
@@ -252,5 +252,26 @@ func TestSearchResultJSONTags(t *testing.T) {
 		if strings.Contains(raw, key) {
 			t.Errorf("json output should not contain Go field name %s: %s", key, raw)
 		}
+	}
+}
+
+func TestUpsertPageStoresImage(t *testing.T) {
+	app := newTestApp(t)
+
+	doc := createDocument(t, app, "Manual")
+	page := createPage(t, app, doc.Id, 1, "needle text")
+	if err := UpsertPage(app, page); err != nil {
+		t.Fatalf("UpsertPage() error: %v", err)
+	}
+
+	results, err := Search(app, "needle", 10)
+	if err != nil {
+		t.Fatalf("Search() error: %v", err)
+	}
+	if len(results) != 1 {
+		t.Fatalf("results len = %d, want 1", len(results))
+	}
+	if results[0].PageImage != page.GetString("image") {
+		t.Errorf("PageImage = %q, want %q (stored filename)", results[0].PageImage, page.GetString("image"))
 	}
 }

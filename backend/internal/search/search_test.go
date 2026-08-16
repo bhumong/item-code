@@ -90,4 +90,7 @@ func TestRunSearchReturnsMatches(t *testing.T) {
 	if results[0].PageNumber != 2 {
 		t.Errorf("PageNumber = %d, want 2", results[0].PageNumber)
 	}
+	if results[0].PageImage != page.GetString("image") {
+		t.Errorf("PageImage = %q, want %q", results[0].PageImage, page.GetString("image"))
+	}
 }
