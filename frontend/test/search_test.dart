@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ocr_search/app.dart';
+import 'package:ocr_search/core/locale_provider.dart';
 import 'package:ocr_search/core/models.dart';
 import 'package:ocr_search/features/auth/auth_controller.dart';
 
@@ -68,5 +69,24 @@ void main() {
 
     expect(find.text('No results. Try different terms.'), findsOneWidget);
     expect(fake.searchCalls, 1);
+  });
+
+  testWidgets('search screen uses Indonesian when locale is id', (tester) async {
+    final fake = FakeApiClient()..userEmail = 'bob@gmail.com';
+    await tester.pumpWidget(ProviderScope(
+      overrides: [
+        apiClientProvider.overrideWithValue(fake),
+        localeProvider.overrideWith(IndonesianLocale.new),
+      ],
+      child: const OcrSearchApp(),
+    ));
+    await tester.pumpAndSettle();
+
+    await tester.enterText(find.byType(TextField).first, 'needle');
+    await tester.testTextInput.receiveAction(TextInputAction.done);
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Tidak ada hasil. Coba kata lain.'), findsOneWidget);
   });
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:ocr_search/l10n/app_localizations.dart';
 
 import '../../core/api_client.dart';
 import 'auth_controller.dart';
@@ -10,6 +11,7 @@ class LoginScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final auth = ref.watch(authControllerProvider);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       body: Center(
         child: Padding(
@@ -19,15 +21,18 @@ class LoginScreen extends ConsumerWidget {
             children: [
               const Icon(Icons.menu_book, size: 72),
               const SizedBox(height: 16),
-              const Text(
-                'OCR Search',
-                style: TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+              Text(
+                l10n.appTitle,
+                style: const TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 32),
               FilledButton.icon(
                 onPressed: auth.isLoading ? null : () => _login(context, ref),
                 icon: const Icon(Icons.login),
-                label: const Text('Sign in with Google'),
+                label: Text(l10n.signInWithGoogle),
               ),
             ],
           ),
@@ -38,14 +43,13 @@ class LoginScreen extends ConsumerWidget {
 
   Future<void> _login(BuildContext context, WidgetRef ref) async {
     final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context)!;
     try {
       await ref.read(authControllerProvider.notifier).login();
     } on ApiException catch (e) {
       messenger.showSnackBar(SnackBar(content: Text(e.message)));
     } catch (_) {
-      messenger.showSnackBar(
-        const SnackBar(content: Text('Sign-in failed. Please try again.')),
-      );
+      messenger.showSnackBar(SnackBar(content: Text(l10n.signInFailed)));
     }
   }
 }

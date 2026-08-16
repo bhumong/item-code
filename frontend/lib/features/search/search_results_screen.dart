@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:ocr_search/l10n/app_localizations.dart';
 
 import '../../core/models.dart';
 import 'highlighted_text.dart';
@@ -44,13 +45,14 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
   @override
   Widget build(BuildContext context) {
     final results = ref.watch(searchResultsProvider);
+    final l10n = AppLocalizations.of(context)!;
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.go('/')),
         title: TextField(
           controller: _controller,
           autofocus: true,
-          decoration: const InputDecoration(hintText: 'Search...'),
+          decoration: InputDecoration(hintText: l10n.searchHint),
           onChanged: (value) =>
               ref.read(searchResultsProvider.notifier).updateQuery(value),
         ),
@@ -58,9 +60,9 @@ class _SearchResultsScreenState extends ConsumerState<SearchResultsScreen> {
       body: results.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, stackTrace) =>
-            Center(child: Text('Search failed: $error')),
+            Center(child: Text(l10n.searchFailed('$error'))),
         data: (items) => items.isEmpty
-            ? const Center(child: Text('No results. Try different terms.'))
+            ? Center(child: Text(l10n.noResults))
             : ListView.builder(
                 padding: const EdgeInsets.all(16),
                 itemCount: items.length,

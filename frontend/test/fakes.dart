@@ -1,7 +1,16 @@
+import 'dart:ui';
+
 import 'dart:typed_data';
 
 import 'package:ocr_search/core/api_client.dart';
+import 'package:ocr_search/core/locale_provider.dart';
 import 'package:ocr_search/core/models.dart';
+
+/// Forces the app locale to Indonesian in widget tests.
+class IndonesianLocale extends LocaleNotifier {
+  @override
+  Locale build() => const Locale('id');
+}
 
 class FakeApiClient implements ApiClient {
   String? userEmail;
