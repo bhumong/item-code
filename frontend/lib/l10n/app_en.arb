@@ -1,0 +1,79 @@
+{
+  "@@locale": "en",
+  "appTitle": "OCR Search",
+  "signInWithGoogle": "Sign in with Google",
+  "signInFailed": "Sign-in failed. Please try again.",
+  "searchDocumentsHint": "Search documents...",
+  "noDocumentsYet": "No documents yet. Tap + to create one.",
+  "newDocument": "New Document",
+  "pageCount": "{count, plural, =1{page} other{pages}}",
+  "@pageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadDocuments": "Failed to load documents: {error}",
+  "@failedToLoadDocuments": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "documentTitle": "Document",
+  "editTitle": "Edit title",
+  "uploadImage": "Upload Image",
+  "uploadFromCamera": "Upload from Camera",
+  "uploadingProgress": "Uploading {done}/{total}...",
+  "@uploadingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadPages": "Failed to load pages: {error}",
+  "@failedToLoadPages": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noPagesYet": "No pages yet. Use Upload Image.",
+  "renameDocument": "Rename Document",
+  "titleLabel": "Title",
+  "cancel": "Cancel",
+  "save": "Save",
+  "create": "Create",
+  "statusPending": "Pending",
+  "statusProcessing": "Processing",
+  "statusCompleted": "Completed",
+  "statusFailed": "Failed",
+  "searchHint": "Search...",
+  "searchFailed": "Search failed: {error}",
+  "@searchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noResults": "No results. Try different terms.",
+  "resultTitle": "{title} - page {page}",
+  "@resultTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      }
+    }
+  }
+}

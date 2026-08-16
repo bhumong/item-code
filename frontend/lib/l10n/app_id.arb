@@ -1,0 +1,79 @@
+{
+  "@@locale": "id",
+  "appTitle": "Pencarian OCR",
+  "signInWithGoogle": "Masuk dengan Google",
+  "signInFailed": "Gagal masuk. Silakan coba lagi.",
+  "searchDocumentsHint": "Cari dokumen...",
+  "noDocumentsYet": "Belum ada dokumen. Ketuk + untuk membuat.",
+  "newDocument": "Dokumen Baru",
+  "pageCount": "{count, plural, =1{halaman} other{halaman}}",
+  "@pageCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadDocuments": "Gagal memuat dokumen: {error}",
+  "@failedToLoadDocuments": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "documentTitle": "Dokumen",
+  "editTitle": "Ubah judul",
+  "uploadImage": "Unggah Gambar",
+  "uploadFromCamera": "Unggah dari Kamera",
+  "uploadingProgress": "Mengunggah {done}/{total}...",
+  "@uploadingProgress": {
+    "placeholders": {
+      "done": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+  "failedToLoadPages": "Gagal memuat halaman: {error}",
+  "@failedToLoadPages": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noPagesYet": "Belum ada halaman. Gunakan Unggah Gambar.",
+  "renameDocument": "Ubah Nama Dokumen",
+  "titleLabel": "Judul",
+  "cancel": "Batal",
+  "save": "Simpan",
+  "create": "Buat",
+  "statusPending": "Menunggu",
+  "statusProcessing": "Diproses",
+  "statusCompleted": "Selesai",
+  "statusFailed": "Gagal",
+  "searchHint": "Cari...",
+  "searchFailed": "Pencarian gagal: {error}",
+  "@searchFailed": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noResults": "Tidak ada hasil. Coba kata lain.",
+  "resultTitle": "{title} - halaman {page}",
+  "@resultTitle": {
+    "placeholders": {
+      "title": {
+        "type": "String"
+      },
+      "page": {
+        "type": "int"
+      }
+    }
+  }
+}
