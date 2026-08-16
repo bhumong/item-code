@@ -12,20 +12,29 @@ import (
 	"time"
 )
 
-const defaultPrompt = "Extract all legible text from this image accurately."
+const highPrecisionPrompt = `You are a high-precision Optical Character Recognition (OCR) engine. Your sole task is to transcribe all readable text from the provided image exactly as it appears.
+
+## Rules:
+1. Transcribe all text verbatim. Preserve original casing, punctuation, spelling, and line breaks.
+2. Do NOT convert or format the output into Markdown, JSON, HTML, bullet lists, or tables.
+3. Do NOT fix typos, correct grammar, or alter words.
+4. Mark illegible or completely cut-off text as [unclear].
+5. Output ONLY the raw transcribed text. Do NOT include any introductory or concluding comments, greetings, or meta-explanations.`
 
 type Config struct {
-	BaseURL string
-	APIKey  string
-	Model   string
-	Timeout time.Duration
+	BaseURL     string
+	APIKey      string
+	Model       string
+	Timeout     time.Duration
+	Temperature float64
 }
 
 type Client struct {
-	baseURL string
-	apiKey  string
-	model   string
-	http    *http.Client
+	baseURL     string
+	apiKey      string
+	model       string
+	temperature float64
+	http        *http.Client
 }
 
 type ContentPart struct {
@@ -44,8 +53,9 @@ type Message struct {
 }
 
 type chatCompletionRequest struct {
-	Model    string    `json:"model"`
-	Messages []Message `json:"messages"`
+	Model       string    `json:"model"`
+	Temperature float64   `json:"temperature"`
+	Messages    []Message `json:"messages"`
 }
 
 type chatCompletionResponse struct {
@@ -67,10 +77,11 @@ func NewClient(cfg Config) *Client {
 		cfg.Timeout = 120 * time.Second
 	}
 	return &Client{
-		baseURL: strings.TrimRight(cfg.BaseURL, "/"),
-		apiKey:  cfg.APIKey,
-		model:   cfg.Model,
-		http:    &http.Client{Timeout: cfg.Timeout},
+		baseURL:     strings.TrimRight(cfg.BaseURL, "/"),
+		apiKey:      cfg.APIKey,
+		model:       cfg.Model,
+		temperature: cfg.Temperature,
+		http:        &http.Client{Timeout: cfg.Timeout},
 	}
 }
 
@@ -80,19 +91,19 @@ func (c *Client) ExtractText(ctx context.Context, imageData []byte, mime string)
 	}
 
 	reqBody := chatCompletionRequest{
-		Model: c.model,
-		Messages: []Message{{
-			Role: "user",
-			Content: []ContentPart{
-				{Type: "text", Text: defaultPrompt},
+		Model:       c.model,
+		Temperature: c.temperature,
+		Messages: []Message{
+			{Role: "system", Content: []ContentPart{{Type: "text", Text: highPrecisionPrompt}}},
+			{Role: "user", Content: []ContentPart{
 				{
 					Type: "image_url",
 					ImageURL: &ImageURL{
 						URL: fmt.Sprintf("data:%s;base64,%s", mime, base64.StdEncoding.EncodeToString(imageData)),
 					},
 				},
-			},
-		}},
+			}},
+		},
 	}
 
 	payload, err := json.Marshal(reqBody)

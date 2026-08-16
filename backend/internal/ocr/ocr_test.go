@@ -39,25 +39,53 @@ func TestExtractTextSuccess(t *testing.T) {
 	if gotBody.Model != "google/gemini-test" {
 		t.Errorf("request model = %q", gotBody.Model)
 	}
-	if len(gotBody.Messages) != 1 {
-		t.Fatalf("messages len = %d, want 1", len(gotBody.Messages))
+	if gotBody.Temperature != 0 {
+		t.Errorf("request temperature = %v, want 0", gotBody.Temperature)
 	}
-	msg := gotBody.Messages[0]
-	if msg.Role != "user" {
-		t.Errorf("role = %q, want user", msg.Role)
+	if len(gotBody.Messages) != 2 {
+		t.Fatalf("messages len = %d, want 2 (system + user)", len(gotBody.Messages))
 	}
-	if len(msg.Content) != 2 {
-		t.Fatalf("content parts len = %d, want 2", len(msg.Content))
+	sys := gotBody.Messages[0]
+	if sys.Role != "system" {
+		t.Errorf("messages[0] role = %q, want system", sys.Role)
 	}
-	if msg.Content[0].Type != "text" || msg.Content[0].Text == "" {
-		t.Errorf("text part = %+v, want non-empty prompt", msg.Content[0])
+	if len(sys.Content) != 1 || sys.Content[0].Type != "text" {
+		t.Fatalf("system content = %+v, want single text part", sys.Content)
 	}
-	if msg.Content[1].Type != "image_url" || msg.Content[1].ImageURL == nil {
-		t.Fatalf("image part = %+v, want image_url", msg.Content[1])
+	if !strings.Contains(sys.Content[0].Text, "high-precision Optical Character Recognition") {
+		t.Errorf("system prompt missing high-precision intro: %q", sys.Content[0].Text)
+	}
+	user := gotBody.Messages[1]
+	if user.Role != "user" {
+		t.Errorf("messages[1] role = %q, want user", user.Role)
+	}
+	if len(user.Content) != 1 || user.Content[0].Type != "image_url" || user.Content[0].ImageURL == nil {
+		t.Fatalf("user content = %+v, want single image_url part", user.Content)
 	}
 	wantPrefix := "data:image/png;base64,"
-	if !strings.HasPrefix(msg.Content[1].ImageURL.URL, wantPrefix) {
-		t.Errorf("image url = %q, want prefix %q", msg.Content[1].ImageURL.URL, wantPrefix)
+	if !strings.HasPrefix(user.Content[0].ImageURL.URL, wantPrefix) {
+		t.Errorf("image url = %q, want prefix %q", user.Content[0].ImageURL.URL, wantPrefix)
+	}
+}
+
+func TestExtractTextSendsTemperature(t *testing.T) {
+	var raw map[string]any
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if err := json.NewDecoder(r.Body).Decode(&raw); err != nil {
+			t.Errorf("decode request body: %v", err)
+		}
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"ok"}}]}`))
+	}))
+	defer srv.Close()
+
+	c := NewClient(Config{BaseURL: srv.URL, APIKey: "k", Model: "m", Temperature: 0.5})
+	if _, err := c.ExtractText(context.Background(), []byte("x"), "image/png"); err != nil {
+		t.Fatalf("ExtractText() error: %v", err)
+	}
+	temp, ok := raw["temperature"].(float64)
+	if !ok || temp != 0.5 {
+		t.Errorf("temperature = %v (%T), want 0.5", raw["temperature"], raw["temperature"])
 	}
 }
 

@@ -44,10 +44,11 @@ func main() {
 	search.RegisterRoutes(app)
 
 	client := ocr.NewClient(ocr.Config{
-		BaseURL: cfg.OCR.BaseURL,
-		APIKey:  cfg.OCR.APIKey,
-		Model:   cfg.OCR.Model,
-		Timeout: cfg.OCR.Timeout,
+		BaseURL:     cfg.OCR.BaseURL,
+		APIKey:      cfg.OCR.APIKey,
+		Model:       cfg.OCR.Model,
+		Timeout:     cfg.OCR.Timeout,
+		Temperature: cfg.OCR.Temperature,
 	})
 	opts := queue.ProcessOptions{
 		Concurrency: cfg.OCR.Concurrency,
