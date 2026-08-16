@@ -14,6 +14,7 @@ func TestLoadDefaults(t *testing.T) {
 	t.Setenv("OCR_CONCURRENCY", "")
 	t.Setenv("OCR_RETRY_MAX", "")
 	t.Setenv("OCR_TIMEOUT", "")
+	t.Setenv("OCR_TEMPERATURE", "")
 	t.Setenv("GOOGLE_OAUTH_CLIENT_ID", "")
 	t.Setenv("GOOGLE_OAUTH_CLIENT_SECRET", "")
 
@@ -42,6 +43,9 @@ func TestLoadDefaults(t *testing.T) {
 	if cfg.OCR.Timeout != 120*time.Second {
 		t.Errorf("OCR.Timeout = %v, want 120s", cfg.OCR.Timeout)
 	}
+	if cfg.OCR.Temperature != 0 {
+		t.Errorf("OCR.Temperature = %v, want 0 (default)", cfg.OCR.Temperature)
+	}
 }
 
 func TestLoadOverrides(t *testing.T) {
@@ -53,6 +57,7 @@ func TestLoadOverrides(t *testing.T) {
 	t.Setenv("OCR_MODEL", "google/gemini-3")
 	t.Setenv("OCR_CONCURRENCY", "7")
 	t.Setenv("OCR_TIMEOUT", "30s")
+	t.Setenv("OCR_TEMPERATURE", "0.5")
 
 	cfg, err := Load()
 	if err != nil {
@@ -81,6 +86,9 @@ func TestLoadOverrides(t *testing.T) {
 	}
 	if cfg.OCR.Timeout != 30*time.Second {
 		t.Errorf("OCR.Timeout = %v, want 30s", cfg.OCR.Timeout)
+	}
+	if cfg.OCR.Temperature != 0.5 {
+		t.Errorf("OCR.Temperature = %v, want 0.5", cfg.OCR.Temperature)
 	}
 }
 

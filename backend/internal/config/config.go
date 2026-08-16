@@ -34,6 +34,7 @@ type OCRConfig struct {
 	Concurrency int
 	RetryMax    int
 	Timeout     time.Duration
+	Temperature float64
 }
 
 type OAuthConfig struct {
@@ -60,6 +61,7 @@ func Load() (Config, error) {
 			Concurrency: getenvInt("OCR_CONCURRENCY", 5),
 			RetryMax:    getenvInt("OCR_RETRY_MAX", 3),
 			Timeout:     getenvDuration("OCR_TIMEOUT", 120*time.Second),
+			Temperature: getenvFloat("OCR_TEMPERATURE", 0),
 		},
 		OAuth: OAuthConfig{
 			GoogleClientID:     os.Getenv("GOOGLE_OAUTH_CLIENT_ID"),
@@ -143,6 +145,15 @@ func getenvDuration(key string, fallback time.Duration) time.Duration {
 	if v := os.Getenv(key); v != "" {
 		if d, err := time.ParseDuration(v); err == nil {
 			return d
+		}
+	}
+	return fallback
+}
+
+func getenvFloat(key string, fallback float64) float64 {
+	if v := os.Getenv(key); v != "" {
+		if f, err := strconv.ParseFloat(v, 64); err == nil {
+			return f
 		}
 	}
 	return fallback
