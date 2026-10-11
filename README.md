@@ -42,6 +42,8 @@ The `prod` task builds Flutter Web with the host Flutter SDK, then builds the pr
 
 For a public VPS, place a TLS-enabled reverse proxy in front of `127.0.0.1:8090`. SeaweedFS S3 is bound to `127.0.0.1:9000` and is not exposed on the public interface.
 
+For a complete standalone-binary deployment walkthrough, see [Single-VPS Deployment](docs/single-vps-deployment.md).
+
 ## Standalone Binary
 
 After `go tool task install`, build a Linux binary containing both PocketBase and the Flutter Web assets:
