@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"io/fs"
 	"log"
 
 	"github.com/pocketbase/pocketbase"
+	"github.com/pocketbase/pocketbase/apis"
 	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/plugins/migratecmd"
 	"github.com/pocketbase/pocketbase/tools/osutils"
@@ -25,7 +27,7 @@ func main() {
 		log.Fatalf("failed to load config: %v", err)
 	}
 
-	app := pocketbase.New()
+	app := newPocketBaseApp(cfg.DataDir)
 
 	migratecmd.MustRegister(app, app.RootCmd, migratecmd.Config{
 		Automigrate: osutils.IsProbablyGoRun(),
@@ -42,6 +44,15 @@ func main() {
 	queue.RegisterHooks(app)
 	oauth.RegisterHooks(app)
 	search.RegisterRoutes(app)
+
+	webDist, err := fs.Sub(embeddedWebAssets, "web/dist")
+	if err != nil {
+		log.Fatalf("failed to load embedded web assets: %v", err)
+	}
+	app.OnServe().BindFunc(func(e *core.ServeEvent) error {
+		e.Router.GET("/{path...}", apis.Static(webDist, true))
+		return e.Next()
+	})
 
 	client := ocr.NewClient(ocr.Config{
 		BaseURL: cfg.OCR.BaseURL,
@@ -73,4 +84,10 @@ func main() {
 	if err := app.Start(); err != nil {
 		log.Fatal(err)
 	}
+}
+
+func newPocketBaseApp(dataDir string) *pocketbase.PocketBase {
+	return pocketbase.NewWithConfig(pocketbase.Config{
+		DefaultDataDir: dataDir,
+	})
 }

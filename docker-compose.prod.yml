@@ -1,0 +1,5 @@
+services:
+  backend:
+    image: ocrsearch/backend:production
+    build:
+      target: production
