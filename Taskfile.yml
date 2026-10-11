@@ -1,0 +1,61 @@
+version: '3'
+
+tasks:
+  install:
+    desc: Download Go tool and Flutter dependencies
+    cmds:
+      - go mod download
+      - task: frontend-install
+
+  frontend-install:
+    internal: true
+    dir: frontend
+    cmds:
+      - flutter pub get
+
+  dev:
+    desc: Start local services and Flutter Web
+    preconditions:
+      - sh: test -f .env
+        msg: .env is missing. Create it from .env.example before starting development.
+    cmds:
+      - defer: docker compose down
+      - docker compose up --build --wait --wait-timeout 180 -d
+      - task: frontend-dev
+
+  prod:
+    desc: Build and start PocketBase with embedded Flutter Web
+    preconditions:
+      - sh: test -f .env
+        msg: .env is missing. Create it from .env.example before starting production services.
+    cmds:
+      - task: frontend-production-build
+      - docker compose -f docker-compose.yml -f docker-compose.prod.yml up --build --wait --wait-timeout 180 -d
+
+  build:
+    desc: Build a standalone Linux binary with embedded Flutter Web
+    vars:
+      PLATFORM: '{{.PLATFORM | default "linux/amd64"}}'
+    preconditions:
+      - sh: test -f frontend/.dart_tool/package_config.json
+        msg: Run `go tool task install` before building the standalone binary.
+    cmds:
+      - task: frontend-production-build
+      - docker buildx build --platform={{.PLATFORM}} --target binary --output type=local,dest=dist -f backend/Dockerfile .
+
+  frontend-production-build:
+    internal: true
+    dir: frontend
+    cmds:
+      - flutter build web --release --no-pub
+
+  frontend-dev:
+    internal: true
+    dir: frontend
+    cmds:
+      - flutter run -d web-server --web-port 8080 --dart-define=BACKEND_URL=http://localhost:8090
+
+  down:
+    desc: Stop local services without deleting their data volumes
+    cmds:
+      - docker compose down

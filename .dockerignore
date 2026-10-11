@@ -1,0 +1,9 @@
+.git
+.worktrees
+.env
+**/.env
+**/.dart_tool
+**/pb_data
+dist
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
