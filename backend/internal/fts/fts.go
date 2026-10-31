@@ -1,6 +1,7 @@
 package fts
 
 import (
+	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -16,6 +17,7 @@ type SearchResult struct {
 	PageID        string `db:"page_id" json:"page_id"`
 	PageNumber    int    `db:"page_number" json:"page_number"`
 	Snippet       string `db:"snippet" json:"snippet"`
+	Image         string `db:"image" json:"image"`
 }
 
 // UpsertPage replaces the search_fts row for a single page, embedding its
@@ -93,9 +95,11 @@ func Search(app core.App, q string, limit int) ([]SearchResult, error) {
 
 	results := []SearchResult{}
 	err := app.DB().NewQuery(`
-		SELECT document_id, title, page_id, page_number,
+		SELECT search_fts.document_id, search_fts.title, search_fts.page_id,
+		       search_fts.page_number, pages.image AS image,
 		       highlight(search_fts, 1, '<em>', '</em>') AS snippet
 		FROM search_fts
+		JOIN pages ON pages.id = search_fts.page_id
 		WHERE search_fts MATCH {:q}
 		ORDER BY rank
 		LIMIT {:limit}
@@ -103,7 +107,28 @@ func Search(app core.App, q string, limit int) ([]SearchResult, error) {
 		"q":     SanitizeQuery(q),
 		"limit": limit,
 	}).All(&results)
+	for i := range results {
+		results[i].Image = normalizeImageField(results[i].Image)
+	}
 	return results, err
+}
+
+// normalizeImageField turns the raw pages.image DB value into a single file
+// name. PocketBase stores file fields as a JSON array string; older or test
+// rows may hold a bare filename.
+func normalizeImageField(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if strings.HasPrefix(raw, "[") {
+		var names []string
+		if err := json.Unmarshal([]byte(raw), &names); err != nil {
+			return ""
+		}
+		if len(names) == 0 {
+			return ""
+		}
+		return names[0]
+	}
+	return raw
 }
 
 // RegisterHooks keeps search_fts in sync with page/document changes.

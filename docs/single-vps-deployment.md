@@ -26,11 +26,34 @@ The default output is `dist/ocr-search` for Linux `amd64`. For an ARM64 VPS, use
 go tool task build PLATFORM=linux/arm64
 ```
 
-Copy the matching binary to the VPS and install it, for example:
+Upload the matching binary with the `upload` task, which uses `rsync` with a
+temporary `.new` file so a partially transferred binary is never used as the
+final artifact:
 
 ```sh
-scp dist/ocr-search deploy@YOUR_VPS:/tmp/ocr-search
-ssh deploy@YOUR_VPS 'sudo install -o root -g root -m 0755 /tmp/ocr-search /usr/local/bin/ocr-search'
+go tool task upload
+```
+
+The task defaults to `item-code.pem`, `nonroot@103.89.0.229`, and
+`/home/nonroot/ocr-search`. Override any of these with variables:
+
+```sh
+go tool task upload SSH_KEY=path/to/key.pem SSH_USER=deploy SSH_HOST=10.0.0.5 REMOTE_DIR=/tmp
+```
+
+`rsync --checksum` skips the transfer when the remote copy already matches, so
+re-running the task after an unchanged build finishes immediately. Install the
+uploaded binary into its final location:
+
+```sh
+ssh nonroot@YOUR_VPS 'sudo install -o root -g root -m 0755 /home/nonroot/ocr-search /usr/local/bin/ocr-search'
+```
+
+Verify the copy by comparing checksums on both machines:
+
+```sh
+shasum -a 256 dist/ocr-search
+ssh nonroot@YOUR_VPS 'sha256sum /home/nonroot/ocr-search'
 ```
 
 Build the binary again whenever the frontend or backend changes; the Flutter Web files are embedded during the build.

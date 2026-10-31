@@ -3,3 +3,7 @@ pb_data/
 backend/backend
 .worktrees/
 dist/
+*.pem
+.env.prod
+*.key
+.gocache/

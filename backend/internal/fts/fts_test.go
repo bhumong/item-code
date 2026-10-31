@@ -103,6 +103,9 @@ func TestUpsertPageAndSearch(t *testing.T) {
 	if !strings.Contains(r.Snippet, "<em>needle</em>") {
 		t.Errorf("snippet = %q, want <em>needle</em> marker", r.Snippet)
 	}
+	if !strings.HasPrefix(r.Image, "page_") || !strings.HasSuffix(r.Image, ".png") {
+		t.Errorf("Image = %q, want stored page filename", r.Image)
+	}
 }
 
 func TestSearchMatchesDocumentTitle(t *testing.T) {

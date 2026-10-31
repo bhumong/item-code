@@ -128,7 +128,7 @@ class _DocumentDetailScreenState extends ConsumerState<DocumentDetailScreen> {
                   const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) =>
                   Center(child: Text('Failed to load pages: $error')),
-              data: (items) => PageGallery(pages: items),
+              data: (items) => PageGallery(pages: items, documentTitle: title),
             ),
           ),
         ],

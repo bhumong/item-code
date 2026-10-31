@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../core/models.dart';
+import '../../core/widgets/fullscreen_image_viewer.dart';
 import 'highlighted_text.dart';
 import 'search_controller.dart';
 
@@ -82,13 +83,54 @@ class _ResultTile extends StatelessWidget {
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       child: ListTile(
-        leading: const Icon(Icons.description_outlined, size: 40),
+        leading: _ResultThumbnail(
+          result: result,
+          onTap: result.imageUrl.isEmpty
+              ? null
+              : () => showFullscreenImage(
+                    context,
+                    imageUrl: result.imageUrl,
+                    caption:
+                        '${result.documentTitle} - page ${result.pageNumber}',
+                  ),
+        ),
         title: Text('${result.documentTitle} - page ${result.pageNumber}'),
         subtitle: HighlightedText(
           text: result.snippet,
           style: Theme.of(context).textTheme.bodyMedium,
         ),
         onTap: () => context.go('/documents/${result.documentId}'),
+      ),
+    );
+  }
+}
+
+class _ResultThumbnail extends StatelessWidget {
+  const _ResultThumbnail({required this.result, this.onTap});
+
+  final SearchResult result;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    if (result.imageUrl.isEmpty) {
+      return const Icon(Icons.description_outlined, size: 40);
+    }
+    return MouseRegion(
+      cursor: SystemMouseCursors.click,
+      child: GestureDetector(
+        onTap: onTap,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(4),
+          child: Image.network(
+            result.thumbUrl,
+            width: 48,
+            height: 60,
+            fit: BoxFit.cover,
+            errorBuilder: (context, error, stackTrace) =>
+                const Icon(Icons.broken_image_outlined, size: 40),
+          ),
+        ),
       ),
     );
   }

@@ -30,11 +30,32 @@ void main() {
       expect(r.snippet, 'the <em>needle</em> valve');
     });
 
+    test('builds page image url from filename', () {
+    final r = SearchResult.fromJson({
+      'page_id': 'p1',
+      'image': 'page_abc.png',
+    }, baseUrl: 'http://localhost:8090');
+    expect(r.imageUrl, 'http://localhost:8090/api/files/pages/p1/page_abc.png');
+  });
+
+    test('builds cropped thumbnail url for the results list', () {
+      final r = SearchResult.fromJson({
+        'page_id': 'p1',
+        'image': 'page_abc.png',
+      }, baseUrl: 'http://localhost:8090');
+      expect(
+          r.thumbUrl,
+          'http://localhost:8090/api/files/pages/p1/page_abc.png'
+          '?thumb=100x120t');
+    });
+
     test('defaults missing fields', () {
       final r = SearchResult.fromJson({});
       expect(r.documentId, '');
       expect(r.pageNumber, 0);
       expect(r.snippet, '');
+    expect(r.imageUrl, '');
+    expect(r.thumbUrl, '');
     });
   });
 
@@ -51,6 +72,31 @@ void main() {
       expect(p.pageNumber, 2);
       expect(p.status, 'completed');
       expect(p.imageUrl, 'http://localhost:8090/api/files/pages/p1/page_abc.png');
+    });
+
+    test('builds cropped thumbnail url for the gallery', () {
+      final p = Page.fromJson({
+        'id': 'p1',
+        'document': 'd1',
+        'page_number': 2,
+        'status': 'completed',
+        'image': 'page_abc.png',
+      });
+      expect(
+          p.thumbUrl,
+          'http://localhost:8090/api/files/pages/p1/page_abc.png'
+          '?thumb=360x360t');
+    });
+
+    test('thumbnail is empty when the page has no image', () {
+      const p = Page(
+        id: 'p1',
+        documentId: 'd1',
+        pageNumber: 1,
+        status: 'pending',
+        imageUrl: '',
+      );
+      expect(p.thumbUrl, '');
     });
   });
 }

@@ -132,7 +132,8 @@ class PocketBaseApiClient implements ApiClient {
     if (data is! List) return const [];
     return data
         .whereType<Map<String, dynamic>>()
-        .map(SearchResult.fromJson)
+        .map((json) =>
+            SearchResult.fromJson(json, baseUrl: _pb.baseURL.toString()))
         .toList();
   }
 

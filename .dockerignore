@@ -7,3 +7,4 @@
 dist
 frontend/.flutter-plugins
 frontend/.flutter-plugins-dependencies
+.gocache/

@@ -43,6 +43,31 @@ tasks:
       - task: frontend-production-build
       - docker buildx build --platform={{.PLATFORM}} --target binary --output type=local,dest=dist -f backend/Dockerfile .
 
+  upload:
+    desc: Upload the standalone binary to the VPS with rsync
+    vars:
+      SSH_KEY: '{{.SSH_KEY | default "item-code.pem"}}'
+      SSH_USER: '{{.SSH_USER | default "nonroot"}}'
+      SSH_HOST: '{{.SSH_HOST | default "103.89.0.229"}}'
+      REMOTE_DIR: '{{.REMOTE_DIR | default "/home/nonroot"}}'
+      BINARY: '{{.BINARY | default "dist/ocr-search"}}'
+      REMOTE_NAME: '{{splitList "/" .BINARY | last}}'
+    preconditions:
+      - sh: test -f {{.BINARY}}
+        msg: "{{.BINARY}} is missing. Run go tool task build before uploading."
+      - sh: test -f {{.SSH_KEY}}
+        msg: "SSH key {{.SSH_KEY}} is missing. Pass SSH_KEY=path/to/key.pem."
+    cmds:
+      - >-
+        rsync --partial --progress --checksum
+        -e "ssh -i {{.SSH_KEY}} -o BatchMode=yes"
+        {{.BINARY}} {{.SSH_USER}}@{{.SSH_HOST}}:{{.REMOTE_DIR}}/{{.REMOTE_NAME}}.new
+      - >-
+        ssh -i {{.SSH_KEY}} -o BatchMode=yes {{.SSH_USER}}@{{.SSH_HOST}}
+        "mv {{.REMOTE_DIR}}/{{.REMOTE_NAME}}.new {{.REMOTE_DIR}}/{{.REMOTE_NAME}}
+        && chmod 0755 {{.REMOTE_DIR}}/{{.REMOTE_NAME}}"
+      - echo "Uploaded {{.REMOTE_NAME}} to {{.SSH_USER}}@{{.SSH_HOST}}:{{.REMOTE_DIR}}"
+
   frontend-production-build:
     internal: true
     dir: frontend

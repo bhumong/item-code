@@ -42,6 +42,17 @@ The `prod` task builds Flutter Web with the host Flutter SDK, then builds the pr
 
 For a public VPS, place a TLS-enabled reverse proxy in front of `127.0.0.1:8090`. SeaweedFS S3 is bound to `127.0.0.1:9000` and is not exposed on the public interface.
 
+Upload the binary to the VPS with:
+
+```sh
+go tool task upload
+```
+
+The task targets `nonroot@103.89.0.229` with `item-code.pem` by default; override with
+`SSH_KEY`, `SSH_USER`, `SSH_HOST`, and `REMOTE_DIR`. See
+[Single-VPS Deployment](docs/single-vps-deployment.md) for installing and running the
+binary.
+
 For a complete standalone-binary deployment walkthrough, see [Single-VPS Deployment](docs/single-vps-deployment.md).
 
 ## Standalone Binary

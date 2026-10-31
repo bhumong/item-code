@@ -3,9 +3,10 @@ package migrations_test
 import (
 	"testing"
 
+	"github.com/pocketbase/pocketbase/core"
 	"github.com/pocketbase/pocketbase/tests"
 
-	_ "ocrsearch/backend/internal/migrations"
+	"ocrsearch/backend/internal/migrations"
 )
 
 func TestCollectionsCreated(t *testing.T) {
@@ -71,5 +72,34 @@ func TestSearchFTSExists(t *testing.T) {
 	}
 	if n != 0 {
 		t.Errorf("search_fts count = %d, want 0", n)
+	}
+}
+
+func TestPageThumbSizesDeclared(t *testing.T) {
+	app, err := tests.NewTestApp()
+	if err != nil {
+		t.Fatalf("NewTestApp() error: %v", err)
+	}
+	defer app.Cleanup()
+
+	pages, err := app.FindCollectionByNameOrId("pages")
+	if err != nil {
+		t.Fatal(err)
+	}
+	field, ok := pages.Fields.GetByName("image").(*core.FileField)
+	if !ok {
+		t.Fatal("pages.image is not a file field")
+	}
+	for _, size := range migrations.PageThumbSizes {
+		found := false
+		for _, declared := range field.Thumbs {
+			if declared == size {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("thumb size %q not declared on pages.image (got %v)", size, field.Thumbs)
+		}
 	}
 }

@@ -1,11 +1,11 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart' hide Page;
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:ocr_search/app.dart';
 import 'package:ocr_search/core/models.dart';
 import 'package:ocr_search/features/auth/auth_controller.dart';
+import 'package:ocr_search/features/pages/page_gallery.dart';
 import 'package:ocr_search/features/pages/upload_controller.dart';
 
 import 'fakes.dart';
@@ -61,6 +61,59 @@ void main() {
     expect(find.text('Processing'), findsOneWidget);
     expect(find.text('Failed'), findsOneWidget);
     expect(find.text('Add Pages'), findsOneWidget);
+  });
+
+  testWidgets('gallery thumbnails open a fullscreen viewer', (tester) async {
+    final fake = seededFake();
+    fake.pagesByDocument['d1']![0] = Page(
+      id: 'p1',
+      documentId: 'd1',
+      pageNumber: 1,
+      status: 'completed',
+      imageUrl: 'http://localhost:8090/api/files/pages/p1/page_abc.png',
+    );
+    await tester.pumpWidget(testApp(fake));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Manual'));
+    await tester.pumpAndSettle();
+
+    // Gallery tiles request the cropped server-side thumbnail.
+    final tile = find.descendant(
+      of: find.byType(PageGallery),
+      matching: find.byType(Image),
+    );
+    expect(tile, findsOneWidget);
+    final tileImage = tester.widget<Image>(tile);
+    expect((tileImage.image as NetworkImage).url,
+        'http://localhost:8090/api/files/pages/p1/page_abc.png?thumb=360x360t');
+
+    await tester.tap(tile);
+    await tester.pumpAndSettle();
+
+    expect(find.byType(Dialog), findsOneWidget);
+    expect(find.text('Manual - page 1'), findsOneWidget);
+    final viewer = tester.widget<Image>(
+      find.descendant(of: find.byType(Dialog), matching: find.byType(Image)),
+    );
+    expect((viewer.image as NetworkImage).url,
+        'http://localhost:8090/api/files/pages/p1/page_abc.png');
+
+    await tester.sendKeyEvent(LogicalKeyboardKey.escape);
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
+  });
+
+  testWidgets('pages without an image stay non-interactive', (tester) async {
+    await tester.pumpWidget(testApp(seededFake()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Manual'));
+    await tester.pumpAndSettle();
+
+    // seededFake pages all have an empty imageUrl, so no tile opens a viewer.
+    expect(find.byType(Image), findsNothing);
+    await tester.tap(find.text('1'));
+    await tester.pumpAndSettle();
+    expect(find.byType(Dialog), findsNothing);
   });
 
   testWidgets('uploading pages increments progress and refreshes gallery',

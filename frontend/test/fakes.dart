@@ -13,6 +13,10 @@ class FakeApiClient implements ApiClient {
   int searchCalls = 0;
   int createDocumentCalls = 0;
 
+  /// Filename the stubbed search response reports for each result's page.
+  /// Empty keeps whatever imageUrl the result was constructed with.
+  String searchImage = '';
+
   @override
   Future<String?> currentUserEmail() async => userEmail;
 
@@ -78,6 +82,17 @@ class FakeApiClient implements ApiClient {
   @override
   Future<List<SearchResult>> search(String query) async {
     searchCalls++;
-    return List.of(searchResults);
+    if (searchImage.isEmpty) return List.of(searchResults);
+    return searchResults
+        .map((r) => SearchResult(
+              documentId: r.documentId,
+              documentTitle: r.documentTitle,
+              pageId: r.pageId,
+              pageNumber: r.pageNumber,
+              snippet: r.snippet,
+              imageUrl: 'http://localhost:8090/api/files/pages/'
+                  '${r.pageId}/$searchImage',
+            ))
+        .toList();
   }
 }
